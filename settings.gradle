@@ -1,0 +1,4 @@
+rootProject.name = 'qupath-javadoc-viewer'
+
+include 'javadocviewer-app'
+include 'javadocviewer-main'

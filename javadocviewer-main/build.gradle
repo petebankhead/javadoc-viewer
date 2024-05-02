@@ -1,0 +1,25 @@
+plugins {
+    id 'javadocviewer.java-conventions'
+    id 'javadocviewer.publishing-conventions'
+
+    alias(libs.plugins.javafx)
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation libs.slf4j
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(libs.versions.java.get())
+    }
+}
+
+javafx {
+    version = libs.versions.javafx.get()
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.web' ]
+}

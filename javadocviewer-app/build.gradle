@@ -1,0 +1,39 @@
+plugins {
+    id 'application'
+    id 'javadocviewer.java-conventions'
+
+    alias(libs.plugins.javafx)
+
+    // Add jlink plugin to add support for assembling modules into a custom runtime image.
+    alias(libs.plugins.jlink)
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':javadocviewer-main')
+    implementation libs.slf4j.jdk14
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(libs.versions.java.get())
+    }
+}
+
+javafx {
+    version = libs.versions.javafx.get()
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.web' ]
+}
+
+application {
+    mainClass = 'qupath.ui.javadocviewer.app.JavadocViewerApp'
+}
+
+jlink {
+    launcher {
+        name = 'javadocviewer'
+    }
+}

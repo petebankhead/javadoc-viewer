@@ -1,0 +1,179 @@
+package qupath.ui.javadocviewer.main.gui.viewer;
+
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.web.WebHistory;
+import javafx.scene.web.WebView;
+import qupath.ui.javadocviewer.main.core.Javadoc;
+import qupath.ui.javadocviewer.main.core.JavadocsFinder;
+import qupath.ui.javadocviewer.main.gui.components.AutoCompletionTextField;
+
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Paths;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ResourceBundle;
+
+/**
+ * A window to browse several Javadocs found by the {@link JavadocsFinder}.
+ * An {@link AutoCompletionTextField} allows to search for Javadoc elements.
+ */
+public class JavadocViewer extends BorderPane {
+
+    private static final ResourceBundle resources = ResourceBundle.getBundle("qupath.ui.javadocviewer.main.strings");
+    private final WebView webView = new WebView();
+    @FXML
+    private Button back;
+    @FXML
+    private Button forward;
+    @FXML
+    private ComboBox<URI> uris;
+    @FXML
+    private HBox searchContainer;
+
+    /**
+     * Create the javadoc viewer.
+     *
+     * @param stylesheet  a property containing a link to a stylesheet which should
+     *                    be applied by this viewer. Can be null
+     * @param urisToSearch  URIs to search for Javadocs. See {@link JavadocsFinder#findJavadocs(URI...)}
+     * @throws IOException when the window creation fails
+     */
+    public JavadocViewer(ReadOnlyStringProperty stylesheet, URI... urisToSearch) throws IOException {
+        initUI(stylesheet, urisToSearch);
+        setUpListeners();
+    }
+
+    @FXML
+    private void onBackClicked(ActionEvent ignoredEvent) {
+        offset(-1);
+    }
+
+    @FXML
+    private void onForwardClicked(ActionEvent ignoredEvent) {
+        offset(1);
+    }
+
+    private void initUI(ReadOnlyStringProperty stylesheet, URI[] urisToSearch) throws IOException {
+        FXMLLoader loader = new FXMLLoader(JavadocViewer.class.getResource("javadoc_viewer.fxml"), resources);
+        loader.setRoot(this);
+        loader.setController(this);
+        loader.load();
+
+        setCenter(webView);
+
+        this.uris.setCellFactory(col -> new ListCell<>() {
+            @Override
+            protected void updateItem(URI item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (item == null || empty) {
+                    setGraphic(null);
+                } else {
+                    setText(getName(item));
+                }
+            }
+        });
+        this.uris.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(URI item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (item == null || empty) {
+                    setGraphic(null);
+                } else {
+                    setText(getName(item));
+                }
+            }
+        });
+
+        AutoCompletionTextField<JavadocEntry> search = new AutoCompletionTextField<>();
+        search.setPrefWidth(400);
+        searchContainer.getChildren().add(search);
+
+        if (stylesheet != null) {
+            webView.getEngine().userStyleSheetLocationProperty().bind(stylesheet);
+        }
+
+        webView.getEngine().loadContent(resources.getString("JavadocViewer.findingJavadocs"));
+        JavadocsFinder.findJavadocs(urisToSearch).thenAccept(javadocs -> Platform.runLater(() -> {
+
+            this.uris.getItems().setAll(javadocs.stream()
+                    .map(Javadoc::getUri)
+                    .sorted(Comparator.comparing(JavadocViewer::getName))
+                    .toList()
+            );
+
+            if (this.uris.getItems().isEmpty()) {
+                webView.getEngine().loadContent(resources.getString("JavadocViewer.noJavadocs"));
+            } else {
+                this.uris.getSelectionModel().select(this.uris.getItems().stream()
+                        .filter(u -> getName(u).toLowerCase().contains("qupath"))
+                        .findFirst()
+                        .orElse(this.uris.getItems().get(0))
+                );
+            }
+
+            search.getSuggestions().addAll(javadocs.stream()
+                    .map(Javadoc::getElements)
+                    .flatMap(List::stream)
+                    .map(javadocElement -> new JavadocEntry(
+                            javadocElement,
+                            () -> webView.getEngine().load(javadocElement.uri().toString())
+                    ))
+                    .sorted(Comparator.comparing(JavadocEntry::getName))
+                    .toList());
+        }));
+    }
+
+    private void setUpListeners() {
+        back.disableProperty().bind(webView.getEngine().getHistory().currentIndexProperty().isEqualTo(0));
+        forward.disableProperty().bind(webView.getEngine().getHistory().currentIndexProperty().greaterThanOrEqualTo(
+                Bindings.size(webView.getEngine().getHistory().getEntries()).subtract(1)
+        ));
+
+        uris.getSelectionModel().selectedItemProperty().addListener((p, o, n) -> {
+            if (n != null) {
+                webView.getEngine().load(n.toString());
+            }
+        });
+        if (uris.getSelectionModel().getSelectedItem() != null) {
+            webView.getEngine().load(uris.getSelectionModel().getSelectedItem().toString());
+        }
+    }
+
+    private void offset(int offset) {
+        WebHistory history = webView.getEngine().getHistory();
+        int index = history.getCurrentIndex() + offset;
+
+        if (index >= 0 && index < history.getEntries().size()) {
+            history.go(offset);
+        }
+    }
+
+    private static String getName(URI uri) {
+        if ("jar".equals(uri.getScheme()))
+            uri = URI.create(uri.getRawSchemeSpecificPart());
+        var path = Paths.get(uri);
+
+        String name = path.getFileName().toString().toLowerCase();
+        // If we have index.html, we want to take the name of the parent
+        if (name.endsWith(".html")) {
+            var fileName = path.getParent().getFileName().toString();
+            if (fileName.endsWith(".jar!"))
+                fileName = fileName.substring(0, fileName.length()-1);
+            return fileName;
+        }
+        return name;
+    }
+}
