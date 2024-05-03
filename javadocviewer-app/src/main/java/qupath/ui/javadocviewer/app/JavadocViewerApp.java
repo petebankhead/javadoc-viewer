@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import qupath.ui.javadocviewer.main.core.JavadocsFinder;
 import qupath.ui.javadocviewer.main.gui.viewer.JavadocViewer;
 
 import java.io.IOException;
@@ -22,7 +23,9 @@ public class JavadocViewerApp extends Application {
     /**
      * Start the Javadoc viewer.
      *
-     * @param args  directories to search for Javadocs
+     * @param args  URIs to search for Javadocs, for example local jars or directories, or
+     *              HTTP URLs. They must have a defined scheme (for example file:///path/to/some/jar.jar
+     *              instead of /path/to/some/jar.jar)
      */
     public static void main(String[] args) {
         Application.launch(JavadocViewerApp.class, args);
