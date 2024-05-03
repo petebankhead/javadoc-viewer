@@ -5,7 +5,6 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import qupath.ui.javadocviewer.main.core.JavadocsFinder;
 import qupath.ui.javadocviewer.main.gui.viewer.JavadocViewer;
 
 import java.io.IOException;
