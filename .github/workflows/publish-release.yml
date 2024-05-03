@@ -27,6 +27,6 @@ jobs:
           MAVEN_PASS: ${{ secrets.MAVEN_PASS }}
       - uses: actions/upload-artifact@v3
         with:
-          name: log-viewer-release-jar
+          name: javadoc-viewer-release-jar
           path: build/libs
           retention-days: 7
