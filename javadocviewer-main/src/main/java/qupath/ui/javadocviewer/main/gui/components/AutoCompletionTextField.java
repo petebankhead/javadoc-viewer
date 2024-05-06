@@ -6,9 +6,6 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
@@ -97,7 +94,7 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
 
     private static Node createCategoryItemText(String category) {
         Text text = new Text(category);
-        text.setFont(Font.font(text.getFont().getFamily(), FontWeight.BOLD, text.getFont().getSize()));
+        text.getStyleClass().add("category-text");
         return text;
     }
 
@@ -108,8 +105,10 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
         Text textFiltered = new Text(text.substring(filterIndex,  filterIndex + filter.length()));
         Text textAfter = new Text(text.substring(filterIndex + filter.length()));
 
-        textFiltered.setFill(Color.ORANGE);
-        textFiltered.setFont(Font.font(textFiltered.getFont().getFamily(), FontWeight.BOLD, textFiltered.getFont().getSize()));
+        textBefore.getStyleClass().add("regular-text");
+        textFiltered.getStyleClass().add("highlighted-text");
+        textAfter.getStyleClass().add("regular-text");
+
         return new TextFlow(textBefore, textFiltered, textAfter);
     }
 }
