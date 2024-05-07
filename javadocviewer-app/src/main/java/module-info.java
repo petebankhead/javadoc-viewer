@@ -1,8 +1,8 @@
 /**
  * This module contains an application to start the Javadoc viewer.
  */
-module qupath.javadoc.viewer.javadocviewer.app.main {
+module qupath.ui.javadocviewer.app {
     requires javafx.graphics;
-    requires qupath.javadoc.viewer.javadocviewer.main.main;
+    requires qupath.ui.javadocviewer.main;
     requires org.slf4j;
 }
