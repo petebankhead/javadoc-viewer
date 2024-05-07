@@ -3,9 +3,6 @@ plugins {
     id 'javadocviewer.java-conventions'
 
     alias(libs.plugins.javafx)
-
-    // Add jlink plugin to add support for assembling modules into a custom runtime image.
-    alias(libs.plugins.jlink)
 }
 
 repositories {
@@ -13,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation project(':javadocviewer-main')
+    implementation project(':javadocviewer')
     implementation libs.slf4j.jdk14
 }
 
@@ -31,10 +28,4 @@ javafx {
 application {
     mainClass = 'qupath.ui.javadocviewer.app.JavadocViewerApp'
     mainModule = 'qupath.ui.javadocviewer.app'
-}
-
-jlink {
-    launcher {
-        name = 'javadocviewer'
-    }
 }

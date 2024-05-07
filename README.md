@@ -6,7 +6,7 @@ A simple JavaFX Javadoc viewer.
 
 The repository contains two subprojects:
 
-* One subproject (`javadocviewer-main`) containing the UI implementation of the Javadoc viewer.
+* One subproject (`javadocviewer`) containing the UI implementation of the Javadoc viewer.
 * One subproject (`javadocviewer-app`) to start the UI implementation as a standalone application. It is mainly used for development.
 
 To use the javadoc viewer:
@@ -17,7 +17,7 @@ To use the javadoc viewer:
 dependencies {
   def javadocViewerVersion = "0.1.0-SNAPSHOT"
 
-  implementation "io.github.qupath:javadocviewer-ui-main:${javadocViewerVersion}"
+  implementation "io.github.qupath:javadocviewer:${javadocViewerVersion}"
 }
 ```
 
