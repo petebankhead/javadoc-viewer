@@ -1,4 +1,4 @@
-package qupath.ui.javadocviewer.main.core;
+package qupath.ui.javadocviewer.core;
 
 import java.net.URI;
 

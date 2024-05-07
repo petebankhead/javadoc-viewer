@@ -1,4 +1,4 @@
-package qupath.ui.javadocviewer.main.gui.viewer;
+package qupath.ui.javadocviewer.gui.viewer;
 
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.scene.Scene;

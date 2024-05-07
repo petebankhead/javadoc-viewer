@@ -1,4 +1,4 @@
-package qupath.ui.javadocviewer.main.core;
+package qupath.ui.javadocviewer.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

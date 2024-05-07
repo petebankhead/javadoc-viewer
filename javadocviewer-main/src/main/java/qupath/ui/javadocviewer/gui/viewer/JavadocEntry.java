@@ -1,7 +1,7 @@
-package qupath.ui.javadocviewer.main.gui.viewer;
+package qupath.ui.javadocviewer.gui.viewer;
 
-import qupath.ui.javadocviewer.main.core.JavadocElement;
-import qupath.ui.javadocviewer.main.gui.components.AutoCompleteTextFieldEntry;
+import qupath.ui.javadocviewer.gui.components.AutoCompleteTextFieldEntry;
+import qupath.ui.javadocviewer.core.JavadocElement;
 
 /**
  * An {@link AutoCompleteTextFieldEntry} that represents a {@link JavadocElement}.

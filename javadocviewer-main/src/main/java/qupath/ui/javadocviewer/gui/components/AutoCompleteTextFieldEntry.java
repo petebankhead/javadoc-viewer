@@ -1,4 +1,4 @@
-package qupath.ui.javadocviewer.main.gui.components;
+package qupath.ui.javadocviewer.gui.components;
 
 /**
  * An entry to a {@link AutoCompletionTextField}.
