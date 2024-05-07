@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation project(':javadocviewer-main')
+    implementation project(':javadocviewer')
     implementation libs.slf4j.jdk14
 }
 
