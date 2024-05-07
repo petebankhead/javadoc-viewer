@@ -11,4 +11,6 @@ module qupath.ui.javadocviewer.main {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;
+
+    opens qupath.ui.javadocviewer.main.gui.viewer to javafx.fxml;
 }

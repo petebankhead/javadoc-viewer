@@ -30,6 +30,7 @@ javafx {
 
 application {
     mainClass = 'qupath.ui.javadocviewer.app.JavadocViewerApp'
+    mainModule = 'qupath.ui.javadocviewer.app'
 }
 
 jlink {
