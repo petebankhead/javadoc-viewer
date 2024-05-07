@@ -1,4 +1,4 @@
-package qupath.ui.javadocviewer.main.gui.components;
+package qupath.ui.javadocviewer.gui.components;
 
 import javafx.geometry.Side;
 import javafx.scene.Node;

@@ -11,4 +11,4 @@
  *     </li>
  * </ul>
  */
-package qupath.ui.javadocviewer.main;
+package qupath.ui.javadocviewer;

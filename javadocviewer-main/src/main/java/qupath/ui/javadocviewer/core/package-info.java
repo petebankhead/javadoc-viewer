@@ -1,4 +1,4 @@
 /**
  * This package contains utilities to find Javadocs.
  */
-package qupath.ui.javadocviewer.main.core;
+package qupath.ui.javadocviewer.core;

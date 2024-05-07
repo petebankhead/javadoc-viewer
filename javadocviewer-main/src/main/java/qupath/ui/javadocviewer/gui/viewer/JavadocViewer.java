@@ -1,4 +1,4 @@
-package qupath.ui.javadocviewer.main.gui.viewer;
+package qupath.ui.javadocviewer.gui.viewer;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -13,9 +13,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
-import qupath.ui.javadocviewer.main.core.Javadoc;
-import qupath.ui.javadocviewer.main.core.JavadocsFinder;
-import qupath.ui.javadocviewer.main.gui.components.AutoCompletionTextField;
+import qupath.ui.javadocviewer.gui.components.AutoCompletionTextField;
+import qupath.ui.javadocviewer.core.Javadoc;
+import qupath.ui.javadocviewer.core.JavadocsFinder;
 
 import java.io.IOException;
 import java.net.URI;
@@ -30,7 +30,7 @@ import java.util.ResourceBundle;
  */
 public class JavadocViewer extends BorderPane {
 
-    private static final ResourceBundle resources = ResourceBundle.getBundle("qupath.ui.javadocviewer.main.strings");
+    private static final ResourceBundle resources = ResourceBundle.getBundle("qupath.ui.javadocviewer.strings");
     private final WebView webView = new WebView();
     @FXML
     private Button back;

@@ -3,8 +3,8 @@
  * It supports multiple Javadoc sources and provides a
  * search feature across all Javadocs.
  */
-module qupath.ui.javadocviewer.main {
-    exports qupath.ui.javadocviewer.main.gui.viewer;
+module qupath.ui.javadocviewer {
+    exports qupath.ui.javadocviewer.gui.viewer;
     requires org.slf4j;
     requires java.net.http;
     requires javafx.graphics;
@@ -12,5 +12,5 @@ module qupath.ui.javadocviewer.main {
     requires javafx.fxml;
     requires javafx.web;
 
-    opens qupath.ui.javadocviewer.main.gui.viewer to javafx.fxml;
+    opens qupath.ui.javadocviewer.gui.viewer to javafx.fxml;
 }
