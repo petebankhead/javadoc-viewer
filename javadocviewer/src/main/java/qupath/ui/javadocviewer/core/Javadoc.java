@@ -56,7 +56,7 @@ public class Javadoc {
      * @return a CompletableFuture with the created Javadoc, or an empty Optional if the creation failed
      */
     public static CompletableFuture<Optional<Javadoc>> create(URI uri) {
-        return getIndexPage(uri).thenApply(indexPage -> indexPage.map(page -> new Javadoc(
+        return getIndexAllPage(uri).thenApply(indexAllPage -> indexAllPage.map(page -> new Javadoc(
                 uri,
                 parseJavadocIndexPage(
                         uri.toString().substring(0, uri.toString().lastIndexOf('/') + 1),
@@ -137,7 +137,7 @@ public class Javadoc {
         return elements;
     }
 
-    private static CompletableFuture<Optional<String>> getIndexPage(URI javadocIndexURI) {
+    private static CompletableFuture<Optional<String>> getIndexAllPage(URI javadocIndexURI) {
         String link = javadocIndexURI.toString().replace(INDEX_PAGE, INDEX_ALL_PAGE);
         URI indexAllURI;
         try {
@@ -148,19 +148,19 @@ public class Javadoc {
         }
 
         if (indexAllURI.getScheme().contains("http")) {
-            return getIndexPageFromHttp(indexAllURI);
+            return getIndexAllPageFromHttp(indexAllURI);
         } else {
             return CompletableFuture.supplyAsync(() -> {
                 if (indexAllURI.getScheme().contains("jar")) {
-                    return getIndexPageFromJar(indexAllURI);
+                    return getIndexAllPageFromJar(indexAllURI);
                 } else {
-                    return getIndexPageFromDirectory(indexAllURI);
+                    return getIndexAllPageFromDirectory(indexAllURI);
                 }
             });
         }
     }
 
-    private static CompletableFuture<Optional<String>> getIndexPageFromHttp(URI uri) {
+    private static CompletableFuture<Optional<String>> getIndexAllPageFromHttp(URI uri) {
         return HttpClient.newHttpClient().sendAsync(
                 HttpRequest.newBuilder()
                         .uri(uri)
@@ -180,7 +180,7 @@ public class Javadoc {
         });
     }
 
-    private static Optional<String> getIndexPageFromJar(URI uri) {
+    private static Optional<String> getIndexAllPageFromJar(URI uri) {
         String jarURI = uri.toString().substring(
                 uri.toString().indexOf('/'),
                 uri.toString().lastIndexOf('!')
@@ -210,7 +210,7 @@ public class Javadoc {
         }
     }
 
-    private static Optional<String> getIndexPageFromDirectory(URI uri) {
+    private static Optional<String> getIndexAllPageFromDirectory(URI uri) {
         try (Stream<String> lines = Files.lines(Paths.get(uri))) {
             return Optional.of(lines.collect(Collectors.joining("\n")));
         } catch (Exception e) {

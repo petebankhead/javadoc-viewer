@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -90,7 +89,7 @@ public class JavadocsFinder {
 
     private static List<URI> findJavadocUris(URI uri) {
         if (uri.getScheme() != null && List.of("http", "https").contains(uri.getScheme())) {
-            return Collections.singletonList(uri);
+            return List.of(uri);
         } else {
             try {
                 return findJavadocUris(Paths.get(uri), 2);
