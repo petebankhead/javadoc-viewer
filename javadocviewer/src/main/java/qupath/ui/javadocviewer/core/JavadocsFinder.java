@@ -90,7 +90,7 @@ public class JavadocsFinder {
 
     private static List<URI> findJavadocUris(URI uri) {
         if (uri.getScheme() != null && List.of("http", "https").contains(uri.getScheme())) {
-            return Collections.singletonList(uri);
+            return List.of(uri);
         } else {
             try {
                 return findJavadocUris(Paths.get(uri), 2);

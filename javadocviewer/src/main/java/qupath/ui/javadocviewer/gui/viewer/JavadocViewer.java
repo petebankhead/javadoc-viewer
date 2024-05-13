@@ -22,7 +22,10 @@ import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A window to browse several Javadocs found by the {@link JavadocsFinder}.
@@ -31,6 +34,7 @@ import java.util.ResourceBundle;
 public class JavadocViewer extends BorderPane {
 
     private static final ResourceBundle resources = ResourceBundle.getBundle("qupath.ui.javadocviewer.strings");
+    private static final Pattern REDIRECTION_PATTERN = Pattern.compile("window\\.location\\.replace\\(['\"](.*?)['\"]\\)");
     private final WebView webView = new WebView();
     @FXML
     private Button back;
@@ -150,6 +154,21 @@ public class JavadocViewer extends BorderPane {
         if (uris.getSelectionModel().getSelectedItem() != null) {
             webView.getEngine().load(uris.getSelectionModel().getSelectedItem().toString());
         }
+
+        // Sometimes, redirection is not automatically performed
+        // (see https://github.com/qupath/qupath/pull/1513#issuecomment-2095553840)
+        // This code enforces redirection
+        webView.getEngine().documentProperty().addListener((p, o, n) -> {
+            if (n != null) {
+                Matcher redirectionMatcher = REDIRECTION_PATTERN.matcher(n.getDocumentElement().getTextContent());
+
+                if (redirectionMatcher.find() && redirectionMatcher.groupCount() > 0) {
+                    changeLocation(webView.getEngine().getLocation(), redirectionMatcher.group(1)).ifPresent(newLocation ->
+                            webView.getEngine().load(newLocation)
+                    );
+                }
+            }
+        });
     }
 
     private void offset(int offset) {
@@ -175,5 +194,15 @@ public class JavadocViewer extends BorderPane {
             return fileName;
         }
         return name;
+    }
+
+    private static Optional<String> changeLocation(String currentLocation, String newLocation) {
+        int index = currentLocation.lastIndexOf("/");
+
+        if (index == -1) {
+            return Optional.empty();
+        } else {
+            return Optional.of(currentLocation.substring(0, currentLocation.lastIndexOf("/")) + "/" + newLocation);
+        }
     }
 }
