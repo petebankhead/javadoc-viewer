@@ -14,6 +14,7 @@ import java.net.URI;
 public class JavadocViewerCommand implements Runnable {
 
     private final Stage owner;
+    private final ReadOnlyStringProperty stylesheet;
     private final URI[] urisToSearch;
     private Stage stage;
 
@@ -21,10 +22,13 @@ public class JavadocViewerCommand implements Runnable {
      * Create the command. This will not create the viewer yet.
      *
      * @param owner  the stage that should own the viewer window. Can be null
+     * @param stylesheet  a property containing a link to a stylesheet which should
+     *                    be applied to the viewer. Can be null
      * @param urisToSearch  URIs to search for Javadocs. See {@link JavadocViewer#JavadocViewer(ReadOnlyStringProperty, URI...)}
      */
-    public JavadocViewerCommand(Stage owner, URI... urisToSearch) {
+    public JavadocViewerCommand(Stage owner, ReadOnlyStringProperty stylesheet, URI... urisToSearch) {
         this.owner = owner;
+        this.stylesheet = stylesheet;
         this.urisToSearch = urisToSearch;
     }
 
@@ -37,7 +41,7 @@ public class JavadocViewerCommand implements Runnable {
                     stage.initOwner(owner);
                 }
 
-                JavadocViewer javadocViewer = new JavadocViewer(null, urisToSearch);
+                JavadocViewer javadocViewer = new JavadocViewer(stylesheet, urisToSearch);
 
                 Scene scene = new Scene(javadocViewer);
                 stage.setScene(scene);
