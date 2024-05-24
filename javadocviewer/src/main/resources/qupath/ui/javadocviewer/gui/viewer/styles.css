@@ -1,6 +1,5 @@
 .category-text {
     -fx-fill: -fx-text-background-color;
-    -fx-font-family: "Arial";
     -fx-font-weight: bold;
 }
 
@@ -10,6 +9,5 @@
 
 .highlighted-text {
     -fx-fill: orange;
-    -fx-font-family: "Arial";
     -fx-font-weight: bold;
 }

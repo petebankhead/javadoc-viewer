@@ -49,7 +49,7 @@ public class JavadocViewer extends BorderPane {
      * Create the javadoc viewer.
      *
      * @param stylesheet  a property containing a link to a stylesheet which should
-     *                    be applied by this viewer. Can be null
+     *                    be applied to this viewer. Can be null
      * @param urisToSearch  URIs to search for Javadocs. See {@link JavadocsFinder#findJavadocs(URI...)}
      * @throws IOException when the window creation fails
      */
