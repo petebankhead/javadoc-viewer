@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -26,24 +25,23 @@ public class JavadocsFinder {
     private static final Logger logger = LoggerFactory.getLogger(JavadocsFinder.class);
     private static final String JAVADOC_INDEX_FILE = "index.html";
     private static final List<String> ARCHIVE_EXTENSIONS = List.of(".jar", ".zip");
+    private static final int SEARCH_DEPTH = 4;
 
     private JavadocsFinder() {
         throw new AssertionError("This class is not instantiable.");
     }
 
     /**
-     * Asynchronously search for Javadocs in the specified URIs and around the application executable.
+     * Asynchronously search for Javadocs in the specified URIs.
      *
      * @param urisToSearch  URIs to search for Javadocs. It can be a directory, an HTTP link,
-     *                      a link to a Javadoc...
+     *                      a link to a jar file...
      * @return a CompletableFuture with the list of Javadocs found
      */
     public static CompletableFuture<List<Javadoc>> findJavadocs(URI... urisToSearch) {
-        return CompletableFuture.supplyAsync(() ->
-                Stream.concat(
-                        Arrays.stream(urisToSearch).map(JavadocsFinder::findJavadocUris).flatMap(Collection::stream),
-                        findJavadocUrisAroundExecutable().stream()
-                )
+        return CompletableFuture.supplyAsync(() -> Arrays.stream(urisToSearch)
+                .map(JavadocsFinder::findJavadocUris)
+                .flatMap(List::stream)
                 .map(Javadoc::create)
                 .map(CompletableFuture::join)
                 .flatMap(Optional::stream)
@@ -52,47 +50,12 @@ public class JavadocsFinder {
         );
     }
 
-    private static List<URI> findJavadocUrisAroundExecutable() {
-        URI codeUri;
-        try {
-            codeUri = JavadocsFinder.class.getProtectionDomain().getCodeSource().getLocation().toURI();
-        } catch (URISyntaxException e) {
-            logger.debug("Could not convert URI", e);
-            return List.of();
-        }
-
-        Path codePath;
-        try {
-            codePath = Paths.get(codeUri);
-        } catch (Exception e) {
-            logger.debug(String.format("Could not convert URI %s to path", codeUri), e);
-            return List.of();
-        }
-
-        // If we have a jar file, we need to check the location...
-        if (codePath.getFileName().toString().toLowerCase().endsWith(".jar")) {
-            if (codePath.getParent().toString().endsWith("/build/libs")) {
-                // We are probably using gradlew run
-                // We can go up several directories to the root project, and then search inside for javadocs
-                return findJavadocUris(codePath.getParent().resolve("../../../").normalize(), 4);
-            } else {
-                // We are probably within a pre-built package
-                // javadoc jars should be either in the same directory or a subdirectory
-                return findJavadocUris(codePath.getParent(), 2);
-            }
-        } else {
-            // If we have a binary directory, we may well be launching from an IDE
-            // We can go up several directories to the root project, and then search inside for javadocs
-            return findJavadocUris(codePath.resolve("../../../").normalize(), 4);
-        }
-    }
-
     private static List<URI> findJavadocUris(URI uri) {
         if (uri.getScheme() != null && List.of("http", "https").contains(uri.getScheme())) {
             return List.of(uri);
         } else {
             try {
-                return findJavadocUris(Paths.get(uri), 2);
+                return findJavadocUris(Paths.get(uri));
             } catch (Exception e) {
                 logger.debug(String.format("Could not convert URI %s to path", uri), e);
                 return List.of();
@@ -100,22 +63,22 @@ public class JavadocsFinder {
         }
     }
 
-    private static List<URI> findJavadocUris(Path path, int searchDepth) {
+    private static List<URI> findJavadocUris(Path path) {
         if (path == null) {
             return List.of();
         } else {
-            logger.debug(String.format("Searching for javadocs in %s (depth=%d)", path, searchDepth));
+            logger.debug(String.format("Searching for javadocs in %s (depth=%d)", path, SEARCH_DEPTH));
 
             if (Files.isDirectory(path)) {
-                return findJavadocUrisFromDirectory(path, searchDepth);
+                return findJavadocUrisFromDirectory(path);
             } else {
                 return findJavadocUrisFromFile(path).map(List::of).orElse(List.of());
             }
         }
     }
 
-    private static List<URI> findJavadocUrisFromDirectory(Path directory, int searchDepth) {
-        try (Stream<Path> walk = Files.walk(directory, searchDepth)) {
+    private static List<URI> findJavadocUrisFromDirectory(Path directory) {
+        try (Stream<Path> walk = Files.walk(directory, JavadocsFinder.SEARCH_DEPTH)) {
             return walk
                     .map(JavadocsFinder::findJavadocUrisFromFile)
                     .flatMap(Optional::stream)
