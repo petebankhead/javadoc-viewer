@@ -17,6 +17,11 @@ public class JavadocViewerCommand implements Runnable {
     private final ReadOnlyStringProperty stylesheet;
     private final URI[] urisToSearch;
     private Stage stage;
+    private JavadocViewer javadocViewer;
+
+    public JavadocViewer getJavadocViewer() {
+        return javadocViewer;
+    }
 
     /**
      * Create the command. This will not create the viewer yet.
@@ -41,7 +46,7 @@ public class JavadocViewerCommand implements Runnable {
                     stage.initOwner(owner);
                 }
 
-                JavadocViewer javadocViewer = new JavadocViewer(stylesheet, urisToSearch);
+                javadocViewer = new JavadocViewer(stylesheet, urisToSearch);
 
                 Scene scene = new Scene(javadocViewer);
                 stage.setScene(scene);
