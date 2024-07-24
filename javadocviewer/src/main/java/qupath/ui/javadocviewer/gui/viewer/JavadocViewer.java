@@ -61,6 +61,14 @@ public class JavadocViewer extends BorderPane {
         setUpListeners();
     }
 
+    /**
+     * Set the search text field to an input query.
+     * @param input The search query string.
+     */
+    public void setSearchInput(String input) {
+        autoCompletionTextField.setText(input);
+    }
+
     @FXML
     private void onBackClicked(ActionEvent ignoredEvent) {
         offset(-1);
@@ -137,10 +145,6 @@ public class JavadocViewer extends BorderPane {
                     .sorted(Comparator.comparing(JavadocEntry::getName))
                     .toList());
         }));
-    }
-
-    public TextField getAutoCompletionTextField() {
-        return autoCompletionTextField;
     }
 
     private void setUpListeners() {
