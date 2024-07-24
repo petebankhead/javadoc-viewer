@@ -9,6 +9,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebHistory;
@@ -44,6 +45,8 @@ public class JavadocViewer extends BorderPane {
     private ComboBox<URI> uris;
     @FXML
     private HBox searchContainer;
+    @FXML
+    private AutoCompletionTextField<JavadocEntry> autoCompletionTextField;
 
     /**
      * Create the javadoc viewer.
@@ -56,6 +59,14 @@ public class JavadocViewer extends BorderPane {
     public JavadocViewer(ReadOnlyStringProperty stylesheet, URI... urisToSearch) throws IOException {
         initUI(stylesheet, urisToSearch);
         setUpListeners();
+    }
+
+    /**
+     * Set the search text field to an input query.
+     * @param input The search query string.
+     */
+    public void setSearchInput(String input) {
+        autoCompletionTextField.setText(input);
     }
 
     @FXML
@@ -101,10 +112,6 @@ public class JavadocViewer extends BorderPane {
             }
         });
 
-        AutoCompletionTextField<JavadocEntry> search = new AutoCompletionTextField<>();
-        search.setPrefWidth(400);
-        searchContainer.getChildren().add(search);
-
         if (stylesheet != null) {
             webView.getEngine().userStyleSheetLocationProperty().bind(stylesheet);
         }
@@ -128,7 +135,7 @@ public class JavadocViewer extends BorderPane {
                 );
             }
 
-            search.getSuggestions().addAll(javadocs.stream()
+            autoCompletionTextField.getSuggestions().addAll(javadocs.stream()
                     .map(Javadoc::getElements)
                     .flatMap(List::stream)
                     .map(javadocElement -> new JavadocEntry(

@@ -17,6 +17,23 @@ public class JavadocViewerCommand implements Runnable {
     private final ReadOnlyStringProperty stylesheet;
     private final URI[] urisToSearch;
     private Stage stage;
+    private JavadocViewer javadocViewer;
+
+    /**
+     * Get a reference to the singleton {@link JavadocViewer}
+     * @return A JavadocViewer, unless the constructor fails, in which case
+     * a {@link RuntimeException} is thrown.
+     */
+    public JavadocViewer getJavadocViewer() {
+        if (javadocViewer == null) {
+            try {
+                javadocViewer = new JavadocViewer(stylesheet, urisToSearch);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return javadocViewer;
+    }
 
     /**
      * Create the command. This will not create the viewer yet.
@@ -35,24 +52,21 @@ public class JavadocViewerCommand implements Runnable {
     @Override
     public void run() {
         if (stage == null) {
-            try {
-                stage = new Stage();
-                if (owner != null) {
-                    stage.initOwner(owner);
-                }
 
-                JavadocViewer javadocViewer = new JavadocViewer(stylesheet, urisToSearch);
-
-                Scene scene = new Scene(javadocViewer);
-                stage.setScene(scene);
-                stage.show();
-
-                stage.setMinWidth(javadocViewer.getWidth());
-                stage.setMinHeight(javadocViewer.getHeight());
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            stage = new Stage();
+            if (owner != null) {
+                stage.initOwner(owner);
             }
+
+            javadocViewer = getJavadocViewer();
+
+            Scene scene = new Scene(javadocViewer);
+            stage.setScene(scene);
+            stage.show();
+
+            stage.setMinWidth(javadocViewer.getWidth());
+            stage.setMinHeight(javadocViewer.getHeight());
+
         }
 
         stage.show();
