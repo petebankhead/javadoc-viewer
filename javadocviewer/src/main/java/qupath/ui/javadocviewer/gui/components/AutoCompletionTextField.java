@@ -4,8 +4,10 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
@@ -21,7 +23,8 @@ import java.util.stream.Stream;
  */
 public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> extends TextField {
 
-    private static final int MAX_ENTRIES = 10;
+    private static final int MAX_ENTRIES = 50;
+    private static final int MAX_POPUP_HEIGHT = 300;
     private final ContextMenu entriesPopup = new ContextMenu();
     private final List<T> suggestions = new ArrayList<>();
 
@@ -29,6 +32,7 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
      * Create the auto-completion text field
      */
     public AutoCompletionTextField() {
+        setUpUI();
         setUpListeners();
     }
 
@@ -38,6 +42,19 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
      */
     public List<T> getSuggestions() {
         return suggestions;
+    }
+
+    private void setUpUI() {
+        entriesPopup.setMaxHeight(MAX_POPUP_HEIGHT);
+
+        // Make context menu respect max height
+        // See https://stackoverflow.com/a/58542568
+        entriesPopup.addEventHandler(Menu.ON_SHOWING, e -> {
+            Node content = entriesPopup.getSkin().getNode();
+            if (content instanceof Region region) {
+                region.setMaxHeight(entriesPopup.getMaxHeight());
+            }
+        });
     }
 
     private void setUpListeners() {
@@ -66,7 +83,7 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
         if (entries.isEmpty()) {
             entriesPopup.hide();
         } else {
-            entriesPopup.getItems().setAll(entries.stream()
+            List<MenuItem> items = entries.stream()
                     .map(AutoCompleteTextFieldEntry::getCategory)
                     .distinct()
                     .flatMap(category -> Stream.concat(
@@ -85,10 +102,16 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
                                         return menuItem;
                                     })
                     ))
-                    .toList()
-            );
+                    .toList();
 
+            entriesPopup.getItems().clear();
+
+            // Add first item, show popup, and then add other items
+            // This is used to avoid the popup to ignore the anchor position
+            // See https://stackoverflow.com/a/58542568
+            entriesPopup.getItems().add(items.get(0));
             entriesPopup.show(this, Side.BOTTOM, 0, 0);
+            entriesPopup.getItems().addAll(items.stream().skip(1).toList());
         }
     }
 
