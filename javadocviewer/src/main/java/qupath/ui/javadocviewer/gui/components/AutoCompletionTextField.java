@@ -68,7 +68,7 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
 
                 populatePopup(
                         suggestions.stream()
-                                .filter(entry -> entry.getName().toLowerCase().contains(loweredCaseEnteredText))
+                                .filter(entry -> entry.getSearchableText().toLowerCase().contains(loweredCaseEnteredText))
                                 .limit(MAX_ENTRIES)
                                 .toList(),
                         enteredText

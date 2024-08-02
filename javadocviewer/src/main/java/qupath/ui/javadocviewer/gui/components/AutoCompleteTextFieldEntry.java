@@ -11,6 +11,11 @@ public interface AutoCompleteTextFieldEntry {
     String getName();
 
     /**
+     * @return the text to use when filtering this entry
+     */
+    String getSearchableText();
+
+    /**
      * @return the category this entry belongs to
      */
     String getCategory();
