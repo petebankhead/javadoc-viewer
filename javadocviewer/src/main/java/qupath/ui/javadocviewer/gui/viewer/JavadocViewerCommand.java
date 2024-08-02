@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ResourceBundle;
 
 /**
  * A command to start a {@link JavadocViewer} in a standalone window.
@@ -13,27 +14,12 @@ import java.net.URI;
  */
 public class JavadocViewerCommand implements Runnable {
 
+    private static final ResourceBundle resources = ResourceBundle.getBundle("qupath.ui.javadocviewer.strings");
     private final Stage owner;
     private final ReadOnlyStringProperty stylesheet;
     private final URI[] urisToSearch;
     private Stage stage;
     private JavadocViewer javadocViewer;
-
-    /**
-     * Get a reference to the singleton {@link JavadocViewer}
-     * @return A JavadocViewer, unless the constructor fails, in which case
-     * a {@link RuntimeException} is thrown.
-     */
-    public JavadocViewer getJavadocViewer() {
-        if (javadocViewer == null) {
-            try {
-                javadocViewer = new JavadocViewer(stylesheet, urisToSearch);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return javadocViewer;
-    }
 
     /**
      * Create the command. This will not create the viewer yet.
@@ -49,14 +35,31 @@ public class JavadocViewerCommand implements Runnable {
         this.urisToSearch = urisToSearch;
     }
 
+    /**
+     * Get a reference to the singleton {@link JavadocViewer}.
+     *
+     * @return A JavadocViewer, unless the constructor fails, in which case
+     * a {@link RuntimeException} is thrown.
+     */
+    public JavadocViewer getJavadocViewer() {
+        if (javadocViewer == null) {
+            try {
+                javadocViewer = new JavadocViewer(stylesheet, urisToSearch);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return javadocViewer;
+    }
+
     @Override
     public void run() {
         if (stage == null) {
-
             stage = new Stage();
             if (owner != null) {
                 stage.initOwner(owner);
             }
+            stage.setTitle(resources.getString("JavadocViewer.title"));
 
             javadocViewer = getJavadocViewer();
 
@@ -66,7 +69,6 @@ public class JavadocViewerCommand implements Runnable {
 
             stage.setMinWidth(javadocViewer.getWidth());
             stage.setMinHeight(javadocViewer.getHeight());
-
         }
 
         stage.show();
