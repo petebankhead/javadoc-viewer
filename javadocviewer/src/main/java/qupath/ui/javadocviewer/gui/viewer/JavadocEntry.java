@@ -28,6 +28,17 @@ class JavadocEntry implements AutoCompleteTextFieldEntry {
     }
 
     @Override
+    public String getSearchableText() {
+        int parenthesisIndex = javadocElement.name().indexOf("(");
+
+        if (parenthesisIndex > -1) {
+            return javadocElement.name().substring(0, parenthesisIndex);
+        } else {
+            return javadocElement.name();
+        }
+    }
+
+    @Override
     public String getCategory() {
         return javadocElement.category();
     }
