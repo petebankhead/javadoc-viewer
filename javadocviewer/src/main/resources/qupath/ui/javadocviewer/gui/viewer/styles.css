@@ -11,3 +11,8 @@
     -fx-fill: orange;
     -fx-font-weight: bold;
 }
+
+/* Set scroll-bars of the viewer to light mode  */
+.web-view .scroll-bar {
+    -fx-base: #fcfcfc;
+}
