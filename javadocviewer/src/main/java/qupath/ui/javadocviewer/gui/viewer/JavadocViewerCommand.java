@@ -22,7 +22,7 @@ public class JavadocViewerCommand implements Runnable {
     private JavadocViewer javadocViewer;
 
     /**
-     * Create the command. This will not create the viewer yet.
+     * Create the command. This will not create the viewer until either the command is run or {@link #getJavadocViewer()} is called.
      *
      * @param owner  the stage that should own the viewer window. Can be null
      * @param stylesheet  a property containing a link to a stylesheet which should
@@ -36,10 +36,10 @@ public class JavadocViewerCommand implements Runnable {
     }
 
     /**
-     * Get a reference to the singleton {@link JavadocViewer}.
+     * Get a reference to the singleton {@link JavadocViewer}, creating it if required.
      *
-     * @return A JavadocViewer, unless the constructor fails, in which case
-     * a {@link RuntimeException} is thrown.
+     * @return the singleton {@link JavadocViewer}
+     * @throws RuntimeException if the JavadocViewer cannot be initialized
      */
     public JavadocViewer getJavadocViewer() {
         if (javadocViewer == null) {
