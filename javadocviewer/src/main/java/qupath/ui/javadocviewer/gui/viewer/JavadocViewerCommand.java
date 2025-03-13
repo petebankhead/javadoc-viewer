@@ -24,10 +24,10 @@ public class JavadocViewerCommand implements Runnable {
     /**
      * Create the command. This will not create the viewer until either the command is run or {@link #getJavadocViewer()} is called.
      *
-     * @param owner  the stage that should own the viewer window. Can be null
-     * @param stylesheet  a property containing a link to a stylesheet which should
-     *                    be applied to the viewer. Can be null
-     * @param urisToSearch  URIs to search for Javadocs. See {@link JavadocViewer#JavadocViewer(ReadOnlyStringProperty, URI...)}
+     * @param owner the stage that should own the viewer window. Can be null
+     * @param stylesheet a property containing a link to a stylesheet which should
+     *                   be applied to the viewer. Can be null
+     * @param urisToSearch URIs to search for Javadocs. See {@link JavadocViewer#JavadocViewer(ReadOnlyStringProperty, URI...)}
      */
     public JavadocViewerCommand(Stage owner, ReadOnlyStringProperty stylesheet, URI... urisToSearch) {
         this.owner = owner;

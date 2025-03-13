@@ -50,10 +50,10 @@ public class JavadocViewer extends BorderPane {
     /**
      * Create the javadoc viewer.
      *
-     * @param stylesheet  a property containing a link to a stylesheet which should
-     *                    be applied to this viewer. Can be null
-     * @param urisToSearch  URIs to search for Javadocs. See {@link JavadocsFinder#findJavadocs(URI...)}
-     * @throws IOException when the window creation fails
+     * @param stylesheet a property containing a link to a stylesheet which should
+     *                   be applied to this viewer. Can be null
+     * @param urisToSearch URIs to search for Javadocs. See {@link JavadocsFinder#findJavadocs(URI...)}
+     * @throws IOException if the window creation fails
      */
     public JavadocViewer(ReadOnlyStringProperty stylesheet, URI... urisToSearch) throws IOException {
         initUI(stylesheet, urisToSearch);
@@ -62,7 +62,8 @@ public class JavadocViewer extends BorderPane {
 
     /**
      * Set the search text field to an input query.
-     * @param input The search query string.
+     *
+     * @param input the search query string.
      */
     public void setSearchInput(String input) {
         autoCompletionTextField.setText(input);
@@ -117,9 +118,8 @@ public class JavadocViewer extends BorderPane {
 
         webView.getEngine().loadContent(resources.getString("JavadocViewer.findingJavadocs"));
         JavadocsFinder.findJavadocs(urisToSearch).thenAccept(javadocs -> Platform.runLater(() -> {
-
             this.uris.getItems().setAll(javadocs.stream()
-                    .map(Javadoc::getUri)
+                    .map(Javadoc::uri)
                     .sorted(Comparator.comparing(JavadocViewer::getName))
                     .toList()
             );
@@ -130,12 +130,12 @@ public class JavadocViewer extends BorderPane {
                 this.uris.getSelectionModel().select(this.uris.getItems().stream()
                         .filter(u -> getName(u).toLowerCase().contains("qupath"))
                         .findFirst()
-                        .orElse(this.uris.getItems().get(0))
+                        .orElse(this.uris.getItems().getFirst())
                 );
             }
 
             autoCompletionTextField.getSuggestions().addAll(javadocs.stream()
-                    .map(Javadoc::getElements)
+                    .map(Javadoc::elements)
                     .flatMap(List::stream)
                     .map(javadocElement -> new JavadocEntry(
                             javadocElement,

@@ -14,8 +14,8 @@ class JavadocEntry implements AutoCompleteTextFieldEntry {
     /**
      * Create a Javadoc entry from a Javadoc element.
      *
-     * @param javadocElement  the javadoc element to represent
-     * @param onSelected  a function to call when this element is selected
+     * @param javadocElement the javadoc element to represent
+     * @param onSelected a function to call when this element is selected
      */
     public JavadocEntry(JavadocElement javadocElement, Runnable onSelected) {
         this.javadocElement = javadocElement;

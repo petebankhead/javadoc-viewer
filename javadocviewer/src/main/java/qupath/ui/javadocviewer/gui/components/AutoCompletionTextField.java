@@ -19,7 +19,7 @@ import java.util.stream.Stream;
  * A {@link TextField} that provides suggestions on a context menu.
  * Suggestions are grouped by category and must implement {@link AutoCompleteTextFieldEntry}.
  *
- * @param <T>  the type of suggestions
+ * @param <T> the type of suggestions
  */
 public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> extends TextField {
 

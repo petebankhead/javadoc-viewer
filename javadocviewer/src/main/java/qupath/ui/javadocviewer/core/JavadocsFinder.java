@@ -12,8 +12,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
@@ -34,62 +36,71 @@ public class JavadocsFinder {
     /**
      * Asynchronously search for Javadocs in the specified URIs.
      *
-     * @param urisToSearch  URIs to search for Javadocs. It can be a directory, an HTTP link,
-     *                      a link to a jar file...
+     * @param urisToSearch URIs to search for Javadocs. It can be a directory, an HTTP link,
+     *                     a link to a jar file...
      * @return a CompletableFuture with the list of Javadocs found
      */
     public static CompletableFuture<List<Javadoc>> findJavadocs(URI... urisToSearch) {
         return CompletableFuture.supplyAsync(() -> Arrays.stream(urisToSearch)
-                .map(JavadocsFinder::findJavadocUris)
+                .map(JavadocsFinder::findJavadocUrisFromUri)
                 .flatMap(List::stream)
-                .map(Javadoc::create)
-                .map(CompletableFuture::join)
-                .flatMap(Optional::stream)
+                .map(uri -> {
+                    try {
+                        return Javadoc.create(uri).get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        if (e instanceof InterruptedException) {
+                            Thread.currentThread().interrupt();
+                        }
+                        logger.debug("Error when creating javadoc of {}. Skipping it", uri, e);
+
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
                 .distinct()
                 .toList()
         );
     }
 
-    private static List<URI> findJavadocUris(URI uri) {
-        if (uri.getScheme() != null && List.of("http", "https").contains(uri.getScheme())) {
+    private static List<URI> findJavadocUrisFromUri(URI uri) {
+        if (Utils.doesUrilinkToWebsite(uri)) {
+            logger.debug("URI {} retrieved", uri);
             return List.of(uri);
         } else {
             try {
-                return findJavadocUris(Paths.get(uri));
+                return findJavadocUrisFromPath(Paths.get(uri));
             } catch (Exception e) {
-                logger.debug(String.format("Could not convert URI %s to path", uri), e);
+                logger.debug("Could not convert URI {} to path", uri, e);
                 return List.of();
             }
         }
     }
 
-    private static List<URI> findJavadocUris(Path path) {
-        if (path == null) {
-            return List.of();
+    private static List<URI> findJavadocUrisFromPath(Path path) {
+        if (Files.isDirectory(path)) {
+            return findJavadocUrisFromDirectory(path);
         } else {
-            logger.debug(String.format("Searching for javadocs in %s (depth=%d)", path, SEARCH_DEPTH));
-
-            if (Files.isDirectory(path)) {
-                return findJavadocUrisFromDirectory(path);
-            } else {
-                return findJavadocUrisFromFile(path).map(List::of).orElse(List.of());
-            }
+            return findJavadocUrisFromFile(path).map(List::of).orElse(List.of());
         }
     }
 
     private static List<URI> findJavadocUrisFromDirectory(Path directory) {
+        logger.debug("Searching for javadocs in {} directory with depth {}", directory, SEARCH_DEPTH);
+
         try (Stream<Path> walk = Files.walk(directory, JavadocsFinder.SEARCH_DEPTH)) {
             return walk
                     .map(JavadocsFinder::findJavadocUrisFromFile)
                     .flatMap(Optional::stream)
                     .toList();
         } catch (IOException e) {
-            logger.debug("Exception while requesting javadoc URIs", e);
+            logger.debug("Exception while searching for javadoc URIs", e);
             return List.of();
         }
     }
 
     private static Optional<URI> findJavadocUrisFromFile(Path path) {
+        logger.debug("Determining if {} contains Javadoc", path);
+
         File file = path.toFile();
 
         if (
@@ -98,10 +109,11 @@ public class JavadocsFinder {
         ) {
             try (Stream<String> lines = Files.lines(path)) {
                 if (lines.anyMatch(l -> l.contains("javadoc"))) {
+                    logger.debug("{} points to a Javadoc index page", path);
                     return Optional.of(path.toUri());
                 }
             } catch (IOException e) {
-                logger.debug(String.format("Error while reading %s", path), e);
+                logger.debug("Error while reading {}", path, e);
             }
         }
 
@@ -112,13 +124,21 @@ public class JavadocsFinder {
         ) {
             try (ZipFile zipFile = new ZipFile(file)) {
                 if (zipFile.getEntry(JAVADOC_INDEX_FILE) != null) {
-                    return Optional.of(new URI(String.format("jar:%s!/%s", file.toURI(), JAVADOC_INDEX_FILE)));
+                    String uri = String.format("jar:%s!/%s", file.toURI(), JAVADOC_INDEX_FILE);
+
+                    try {
+                        logger.debug("{} is an archive containing Javadoc", uri);
+                        return Optional.of(new URI(uri));
+                    } catch (URISyntaxException e) {
+                        logger.warn("Error while creating URI {}", uri, e);
+                    }
                 }
-            } catch (IOException | URISyntaxException e) {
-                logger.warn(String.format("Error while reading %s", path), e);
+            } catch (IOException e) {
+                logger.warn("Error while reading {}", path, e);
             }
         }
 
+        logger.debug("{} doesn't contain Javadoc", path);
         return Optional.empty();
     }
 
