@@ -3,7 +3,7 @@ package qupath.ui.javadocviewer.gui.components;
 /**
  * An entry to a {@link AutoCompletionTextField}.
  */
-public interface AutoCompleteTextFieldEntry {
+public interface AutoCompleteTextFieldEntry extends Comparable<AutoCompleteTextFieldEntry> {
 
     /**
      * @return the text that should be displayed by this entry

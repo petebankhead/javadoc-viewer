@@ -17,7 +17,12 @@ import java.util.stream.Stream;
 
 /**
  * A {@link TextField} that provides suggestions on a context menu.
+ * <p>
  * Suggestions are grouped by category and must implement {@link AutoCompleteTextFieldEntry}.
+ * <p>
+ * Suggestions are sorted according to their order.
+ * <p>
+ * No more than {@link #MAX_ENTRIES} suggestions are displayed at a time.
  *
  * @param <T> the type of suggestions
  */
@@ -69,6 +74,7 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
                 populatePopup(
                         suggestions.stream()
                                 .filter(entry -> entry.getSearchableText().toLowerCase().contains(loweredCaseEnteredText))
+                                .sorted()
                                 .limit(MAX_ENTRIES)
                                 .toList(),
                         enteredText
@@ -109,7 +115,7 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
             // Add first item, show popup, and then add other items
             // This is used to avoid the popup to ignore the anchor position
             // See https://stackoverflow.com/a/58542568
-            entriesPopup.getItems().add(items.get(0));
+            entriesPopup.getItems().add(items.getFirst());
             entriesPopup.show(this, Side.BOTTOM, 0, 0);
             entriesPopup.getItems().addAll(items.stream().skip(1).toList());
         }

@@ -35,6 +35,7 @@ public class JavadocViewer extends BorderPane {
 
     private static final ResourceBundle resources = ResourceBundle.getBundle("qupath.ui.javadocviewer.strings");
     private static final Pattern REDIRECTION_PATTERN = Pattern.compile("window\\.location\\.replace\\(['\"](.*?)['\"]\\)");
+    private static final List<String> CATEGORIES_TO_SKIP = List.of("package", "module");
     private final WebView webView = new WebView();
     @FXML
     private Button back;
@@ -141,7 +142,7 @@ public class JavadocViewer extends BorderPane {
                             javadocElement,
                             () -> webView.getEngine().load(javadocElement.uri().toString())
                     ))
-                    .sorted(Comparator.comparing(JavadocEntry::getName))
+                    .filter(javadocEntry -> !CATEGORIES_TO_SKIP.contains(javadocEntry.getCategory()))
                     .toList());
         }));
     }

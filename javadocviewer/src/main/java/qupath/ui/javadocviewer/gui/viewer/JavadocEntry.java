@@ -3,6 +3,8 @@ package qupath.ui.javadocviewer.gui.viewer;
 import qupath.ui.javadocviewer.gui.components.AutoCompleteTextFieldEntry;
 import qupath.ui.javadocviewer.core.JavadocElement;
 
+import java.util.Map;
+
 /**
  * An {@link AutoCompleteTextFieldEntry} that represents a {@link JavadocElement}.
  */
@@ -46,5 +48,33 @@ class JavadocEntry implements AutoCompleteTextFieldEntry {
     @Override
     public void onSelected() {
         onSelected.run();
+    }
+
+    @Override
+    public int compareTo(AutoCompleteTextFieldEntry otherEntry) {
+        Map<String, Integer> order = Map.of(
+                "Class", 1,
+                "Interface", 2,
+                "Enum", 3,
+                "Constructor", 4,
+                "Static", 5,
+                "Method", 6,
+                "Variable", 7,
+                "Exception", 8,
+                "Annotation", 9,
+                "Element", 10     // display categories in that order
+        );
+
+        int categoryComparison = order.getOrDefault(getCategory(), 0) - order.getOrDefault(otherEntry.getCategory(), 0);
+        if (categoryComparison != 0) {
+            return categoryComparison;
+        }
+
+        return getName().compareTo(otherEntry.getName());
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Javadoc entry of %s", javadocElement);
     }
 }
