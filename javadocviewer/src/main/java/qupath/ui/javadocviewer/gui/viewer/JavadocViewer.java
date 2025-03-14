@@ -20,6 +20,7 @@ import qupath.ui.javadocviewer.core.JavadocsFinder;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +58,7 @@ public class JavadocViewer extends BorderPane {
      * @throws IOException if the window creation fails
      */
     public JavadocViewer(ReadOnlyStringProperty stylesheet, URI... urisToSearch) throws IOException {
-        initUI(stylesheet, urisToSearch);
+        initUI(stylesheet, Arrays.stream(urisToSearch).toList());
         setUpListeners();
     }
 
@@ -80,7 +81,7 @@ public class JavadocViewer extends BorderPane {
         offset(1);
     }
 
-    private void initUI(ReadOnlyStringProperty stylesheet, URI[] urisToSearch) throws IOException {
+    private void initUI(ReadOnlyStringProperty stylesheet, List<URI> urisToSearch) throws IOException {
         FXMLLoader loader = new FXMLLoader(JavadocViewer.class.getResource("javadoc_viewer.fxml"), resources);
         loader.setRoot(this);
         loader.setController(this);
@@ -118,7 +119,7 @@ public class JavadocViewer extends BorderPane {
         }
 
         webView.getEngine().loadContent(resources.getString("JavadocViewer.findingJavadocs"));
-        JavadocsFinder.findJavadocs(urisToSearch).thenAccept(javadocs -> Platform.runLater(() -> {
+        JavadocsFinder.findJavadocs(urisToSearch.toArray(new URI[0])).thenAccept(javadocs -> Platform.runLater(() -> {
             this.uris.getItems().setAll(javadocs.stream()
                     .map(Javadoc::uri)
                     .sorted(Comparator.comparing(JavadocViewer::getName))
