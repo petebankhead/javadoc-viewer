@@ -55,7 +55,7 @@ class JavadocEntry implements AutoCompleteTextFieldEntry {
                     }
                     yield javadocElement.name();
                 }
-                // expect "Class.Class(Parameter)" for constructors or "Class.function(Parameter) for functions. Retain "Class" or "function"
+                // expect "Class.Class(Parameter)" for constructors or "Class.function(Parameter)" for functions. Retain "Class" or "function"
                 case "Constructor", "Static", "Method" -> {
                     int pointIndex = javadocElement.name().indexOf(".");
                     int parenthesisIndex = javadocElement.name().indexOf("(");
