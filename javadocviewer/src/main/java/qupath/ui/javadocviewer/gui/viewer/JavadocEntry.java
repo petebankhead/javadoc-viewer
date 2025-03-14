@@ -10,6 +10,14 @@ import java.util.Map;
  */
 class JavadocEntry implements AutoCompleteTextFieldEntry {
 
+    private static final Map<String, Integer> CATEGORY_ORDER = Map.of(
+            "Class", 1,
+            "Interface", 2,
+            "Enum", 3,
+            "Constructor", 4,
+            "Static", 5,
+            "Method", 6
+    );
     private final JavadocElement javadocElement;
     private final Runnable onSelected;
 
@@ -31,13 +39,33 @@ class JavadocEntry implements AutoCompleteTextFieldEntry {
 
     @Override
     public String getSearchableText() {
-        int parenthesisIndex = javadocElement.name().indexOf("(");
+        return switch (javadocElement.category()) {
+            // expect "some.package.Class". Retain "Class"
+            case "Class", "Interface" -> javadocElement.name().substring(javadocElement.name().indexOf(".") + 1);
+            // expects "some.package.Class.Enum" or "Class.Enum.variable". Retain "Class.Enum" or "Enum.variable"
+            case "Enum" -> {
+                int lastPointIndex = javadocElement.name().lastIndexOf(".");
+                if (lastPointIndex > -1) {
+                    int secondLastPointIndex = javadocElement.name().lastIndexOf(".", lastPointIndex-1);
+                    if (secondLastPointIndex > -1) {
+                        yield javadocElement.name().substring(secondLastPointIndex+1);
+                    }
+                }
+                yield javadocElement.name();
+            }
+            // expect "Class.Class(Parameter)" for constructors or "Class.function(Parameter) for functions. Retain "Class" or "function"
+            case "Constructor", "Static", "Method" -> {
+                int pointIndex = javadocElement.name().indexOf(".");
+                int parenthesisIndex = javadocElement.name().indexOf("(");
 
-        if (parenthesisIndex > -1) {
-            return javadocElement.name().substring(0, parenthesisIndex);
-        } else {
-            return javadocElement.name();
-        }
+                if (parenthesisIndex > -1) {
+                    yield javadocElement.name().substring(pointIndex+1, parenthesisIndex);
+                } else {
+                    yield javadocElement.name().substring(pointIndex+1);
+                }
+            }
+            default -> javadocElement.name();
+        };
     }
 
     @Override
@@ -52,20 +80,7 @@ class JavadocEntry implements AutoCompleteTextFieldEntry {
 
     @Override
     public int compareTo(AutoCompleteTextFieldEntry otherEntry) {
-        Map<String, Integer> order = Map.of(
-                "Class", 1,
-                "Interface", 2,
-                "Enum", 3,
-                "Constructor", 4,
-                "Static", 5,
-                "Method", 6,
-                "Variable", 7,
-                "Exception", 8,
-                "Annotation", 9,
-                "Element", 10     // display categories in that order
-        );
-
-        int categoryComparison = order.getOrDefault(getCategory(), 0) - order.getOrDefault(otherEntry.getCategory(), 0);
+        int categoryComparison = CATEGORY_ORDER.getOrDefault(getCategory(), 0) - CATEGORY_ORDER.getOrDefault(otherEntry.getCategory(), 0);
         if (categoryComparison != 0) {
             return categoryComparison;
         }

@@ -36,7 +36,7 @@ public class JavadocViewer extends BorderPane {
 
     private static final ResourceBundle resources = ResourceBundle.getBundle("qupath.ui.javadocviewer.strings");
     private static final Pattern REDIRECTION_PATTERN = Pattern.compile("window\\.location\\.replace\\(['\"](.*?)['\"]\\)");
-    private static final List<String> CATEGORIES_TO_SKIP = List.of("package", "module");
+    private static final List<String> CATEGORIES_TO_SKIP = List.of("package", "module", "Variable", "Exception", "Annotation", "Element");
     private final WebView webView = new WebView();
     @FXML
     private Button back;
