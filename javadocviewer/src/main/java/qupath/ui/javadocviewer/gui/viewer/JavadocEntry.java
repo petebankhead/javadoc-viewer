@@ -20,6 +20,7 @@ class JavadocEntry implements AutoCompleteTextFieldEntry {
     );
     private final JavadocElement javadocElement;
     private final Runnable onSelected;
+    private String searchableText;
 
     /**
      * Create a Javadoc entry from a Javadoc element.
@@ -39,33 +40,36 @@ class JavadocEntry implements AutoCompleteTextFieldEntry {
 
     @Override
     public String getSearchableText() {
-        return switch (javadocElement.category()) {
-            // expect "some.package.Class". Retain "Class"
-            case "Class", "Interface" -> javadocElement.name().substring(javadocElement.name().indexOf(".") + 1);
-            // expects "some.package.Class.Enum" or "Class.Enum.variable". Retain "Class.Enum" or "Enum.variable"
-            case "Enum" -> {
-                int lastPointIndex = javadocElement.name().lastIndexOf(".");
-                if (lastPointIndex > -1) {
-                    int secondLastPointIndex = javadocElement.name().lastIndexOf(".", lastPointIndex-1);
-                    if (secondLastPointIndex > -1) {
-                        yield javadocElement.name().substring(secondLastPointIndex+1);
+        if (searchableText == null) {
+            searchableText = switch (javadocElement.category()) {
+                // expect "some.package.Class". Retain "Class"
+                case "Class", "Interface" -> javadocElement.name().substring(javadocElement.name().indexOf(".") + 1);
+                // expects "some.package.Class.Enum" or "Class.Enum.variable". Retain "Class.Enum" or "Enum.variable"
+                case "Enum" -> {
+                    int lastPointIndex = javadocElement.name().lastIndexOf(".");
+                    if (lastPointIndex > -1) {
+                        int secondLastPointIndex = javadocElement.name().lastIndexOf(".", lastPointIndex-1);
+                        if (secondLastPointIndex > -1) {
+                            yield javadocElement.name().substring(secondLastPointIndex+1);
+                        }
+                    }
+                    yield javadocElement.name();
+                }
+                // expect "Class.Class(Parameter)" for constructors or "Class.function(Parameter) for functions. Retain "Class" or "function"
+                case "Constructor", "Static", "Method" -> {
+                    int pointIndex = javadocElement.name().indexOf(".");
+                    int parenthesisIndex = javadocElement.name().indexOf("(");
+
+                    if (parenthesisIndex > -1) {
+                        yield javadocElement.name().substring(pointIndex+1, parenthesisIndex);
+                    } else {
+                        yield javadocElement.name().substring(pointIndex+1);
                     }
                 }
-                yield javadocElement.name();
-            }
-            // expect "Class.Class(Parameter)" for constructors or "Class.function(Parameter) for functions. Retain "Class" or "function"
-            case "Constructor", "Static", "Method" -> {
-                int pointIndex = javadocElement.name().indexOf(".");
-                int parenthesisIndex = javadocElement.name().indexOf("(");
-
-                if (parenthesisIndex > -1) {
-                    yield javadocElement.name().substring(pointIndex+1, parenthesisIndex);
-                } else {
-                    yield javadocElement.name().substring(pointIndex+1);
-                }
-            }
-            default -> javadocElement.name();
-        };
+                default -> javadocElement.name();
+            };
+        }
+        return searchableText;
     }
 
     @Override

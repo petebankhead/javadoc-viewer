@@ -97,7 +97,7 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
                             entries.stream()
                                     .filter(entry -> entry.getCategory().equals(category))
                                     .map(entry -> {
-                                        MenuItem menuItem = new CustomMenuItem(createEntryItemText(entry.getName(), filter), true);
+                                        MenuItem menuItem = new CustomMenuItem(createEntryItemText(entry, filter), true);
 
                                         menuItem.setOnAction(actionEvent -> {
                                             setText(entry.getName());
@@ -127,8 +127,12 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
         return text;
     }
 
-    private static Node createEntryItemText(String text, String filter) {
-        int filterIndex = text.toLowerCase().indexOf(filter.toLowerCase());
+    private Node createEntryItemText(T entry, String filter) {
+        String searchableText = entry.getSearchableText();
+        String text = entry.getName();
+
+        int searchableTextIndex = text.indexOf(searchableText);
+        int filterIndex = text.toLowerCase().indexOf(filter.toLowerCase(), searchableTextIndex);
 
         Text textBefore = new Text(text.substring(0, filterIndex));
         Text textFiltered = new Text(text.substring(filterIndex,  filterIndex + filter.length()));
