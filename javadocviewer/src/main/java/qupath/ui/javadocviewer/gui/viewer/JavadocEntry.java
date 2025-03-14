@@ -43,7 +43,7 @@ class JavadocEntry implements AutoCompleteTextFieldEntry {
         if (searchableText == null) {
             searchableText = switch (javadocElement.category()) {
                 // expect "some.package.Class". Retain "Class"
-                case "Class", "Interface" -> javadocElement.name().substring(javadocElement.name().indexOf(".") + 1);
+                case "Class", "Interface" -> javadocElement.name().substring(javadocElement.name().lastIndexOf(".") + 1);
                 // expects "some.package.Class.Enum" or "Class.Enum.variable". Retain "Class.Enum" or "Enum.variable"
                 case "Enum" -> {
                     int lastPointIndex = javadocElement.name().lastIndexOf(".");
