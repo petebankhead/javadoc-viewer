@@ -100,8 +100,6 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
                                         MenuItem menuItem = new CustomMenuItem(createEntryItemText(entry, filter), true);
 
                                         menuItem.setOnAction(actionEvent -> {
-                                            setText(entry.getName());
-                                            positionCaret(entry.getName().length());
                                             entriesPopup.hide();
                                             entry.onSelected();
                                         });
