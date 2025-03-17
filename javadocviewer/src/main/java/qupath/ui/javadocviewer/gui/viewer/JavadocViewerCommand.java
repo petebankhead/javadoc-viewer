@@ -6,6 +6,8 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
 
 /**
@@ -17,22 +19,22 @@ public class JavadocViewerCommand implements Runnable {
     private static final ResourceBundle resources = ResourceBundle.getBundle("qupath.ui.javadocviewer.strings");
     private final Stage owner;
     private final ReadOnlyStringProperty stylesheet;
-    private final URI[] urisToSearch;
+    private final List<URI> urisToSearch;
     private Stage stage;
     private JavadocViewer javadocViewer;
 
     /**
      * Create the command. This will not create the viewer until either the command is run or {@link #getJavadocViewer()} is called.
      *
-     * @param owner  the stage that should own the viewer window. Can be null
-     * @param stylesheet  a property containing a link to a stylesheet which should
-     *                    be applied to the viewer. Can be null
-     * @param urisToSearch  URIs to search for Javadocs. See {@link JavadocViewer#JavadocViewer(ReadOnlyStringProperty, URI...)}
+     * @param owner the stage that should own the viewer window. Can be null
+     * @param stylesheet a property containing a link to a stylesheet which should
+     *                   be applied to the viewer. Can be null
+     * @param urisToSearch URIs to search for Javadocs. See {@link JavadocViewer#JavadocViewer(ReadOnlyStringProperty, URI...)}
      */
     public JavadocViewerCommand(Stage owner, ReadOnlyStringProperty stylesheet, URI... urisToSearch) {
         this.owner = owner;
         this.stylesheet = stylesheet;
-        this.urisToSearch = urisToSearch;
+        this.urisToSearch = Arrays.stream(urisToSearch).toList();
     }
 
     /**
@@ -44,7 +46,7 @@ public class JavadocViewerCommand implements Runnable {
     public JavadocViewer getJavadocViewer() {
         if (javadocViewer == null) {
             try {
-                javadocViewer = new JavadocViewer(stylesheet, urisToSearch);
+                javadocViewer = new JavadocViewer(stylesheet, urisToSearch.toArray(new URI[0]));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

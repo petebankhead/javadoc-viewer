@@ -12,18 +12,24 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
 /**
  * A {@link TextField} that provides suggestions on a context menu.
+ * <p>
  * Suggestions are grouped by category and must implement {@link AutoCompleteTextFieldEntry}.
+ * <p>
+ * Suggestions are sorted according to their order.
+ * <p>
+ * No more than {@link #MAX_ENTRIES} suggestions are displayed at a time.
  *
- * @param <T>  the type of suggestions
+ * @param <T> the type of suggestions
  */
 public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> extends TextField {
 
-    private static final int MAX_ENTRIES = 50;
+    private static final int MAX_ENTRIES = 100;
     private static final int MAX_POPUP_HEIGHT = 300;
     private final ContextMenu entriesPopup = new ContextMenu();
     private final List<T> suggestions = new ArrayList<>();
@@ -66,9 +72,15 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
             } else {
                 String loweredCaseEnteredText = enteredText.toLowerCase();
 
+                Comparator<AutoCompleteTextFieldEntry> comparator =
+                        Comparator.comparing((AutoCompleteTextFieldEntry e) -> e.getSearchableText().toLowerCase().equals(loweredCaseEnteredText) ? -1 : 1)
+                                .thenComparing(e -> e.getSearchableText().toLowerCase().startsWith(loweredCaseEnteredText) ? -1 : 1)
+                                .thenComparing(AutoCompleteTextFieldEntry::compareTo);
+
                 populatePopup(
                         suggestions.stream()
                                 .filter(entry -> entry.getSearchableText().toLowerCase().contains(loweredCaseEnteredText))
+                                .sorted(comparator)
                                 .limit(MAX_ENTRIES)
                                 .toList(),
                         enteredText
@@ -91,11 +103,9 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
                             entries.stream()
                                     .filter(entry -> entry.getCategory().equals(category))
                                     .map(entry -> {
-                                        MenuItem menuItem = new CustomMenuItem(createEntryItemText(entry.getName(), filter), true);
+                                        MenuItem menuItem = new CustomMenuItem(createEntryItemText(entry, filter), true);
 
                                         menuItem.setOnAction(actionEvent -> {
-                                            setText(entry.getName());
-                                            positionCaret(entry.getName().length());
                                             entriesPopup.hide();
                                             entry.onSelected();
                                         });
@@ -109,7 +119,7 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
             // Add first item, show popup, and then add other items
             // This is used to avoid the popup to ignore the anchor position
             // See https://stackoverflow.com/a/58542568
-            entriesPopup.getItems().add(items.get(0));
+            entriesPopup.getItems().add(items.getFirst());
             entriesPopup.show(this, Side.BOTTOM, 0, 0);
             entriesPopup.getItems().addAll(items.stream().skip(1).toList());
         }
@@ -121,8 +131,12 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
         return text;
     }
 
-    private static Node createEntryItemText(String text, String filter) {
-        int filterIndex = text.toLowerCase().indexOf(filter.toLowerCase());
+    private Node createEntryItemText(T entry, String filter) {
+        String searchableText = entry.getSearchableText();
+        String text = entry.getName();
+
+        int searchableTextIndex = text.indexOf(searchableText);
+        int filterIndex = text.toLowerCase().indexOf(filter.toLowerCase(), searchableTextIndex);
 
         Text textBefore = new Text(text.substring(0, filterIndex));
         Text textFiltered = new Text(text.substring(filterIndex,  filterIndex + filter.length()));

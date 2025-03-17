@@ -20,6 +20,7 @@ import qupath.ui.javadocviewer.core.JavadocsFinder;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +36,7 @@ public class JavadocViewer extends BorderPane {
 
     private static final ResourceBundle resources = ResourceBundle.getBundle("qupath.ui.javadocviewer.strings");
     private static final Pattern REDIRECTION_PATTERN = Pattern.compile("window\\.location\\.replace\\(['\"](.*?)['\"]\\)");
+    private static final List<String> CATEGORIES_TO_SKIP = List.of("package", "module", "Variable", "Exception", "Annotation", "Element");
     private final WebView webView = new WebView();
     @FXML
     private Button back;
@@ -50,19 +52,20 @@ public class JavadocViewer extends BorderPane {
     /**
      * Create the javadoc viewer.
      *
-     * @param stylesheet  a property containing a link to a stylesheet which should
-     *                    be applied to this viewer. Can be null
-     * @param urisToSearch  URIs to search for Javadocs. See {@link JavadocsFinder#findJavadocs(URI...)}
-     * @throws IOException when the window creation fails
+     * @param stylesheet a property containing a link to a stylesheet which should
+     *                   be applied to this viewer. Can be null
+     * @param urisToSearch URIs to search for Javadocs. See {@link JavadocsFinder#findJavadocs(URI...)}
+     * @throws IOException if the window creation fails
      */
     public JavadocViewer(ReadOnlyStringProperty stylesheet, URI... urisToSearch) throws IOException {
-        initUI(stylesheet, urisToSearch);
+        initUI(stylesheet, Arrays.stream(urisToSearch).toList());
         setUpListeners();
     }
 
     /**
      * Set the search text field to an input query.
-     * @param input The search query string.
+     *
+     * @param input the search query string.
      */
     public void setSearchInput(String input) {
         autoCompletionTextField.setText(input);
@@ -78,7 +81,7 @@ public class JavadocViewer extends BorderPane {
         offset(1);
     }
 
-    private void initUI(ReadOnlyStringProperty stylesheet, URI[] urisToSearch) throws IOException {
+    private void initUI(ReadOnlyStringProperty stylesheet, List<URI> urisToSearch) throws IOException {
         FXMLLoader loader = new FXMLLoader(JavadocViewer.class.getResource("javadoc_viewer.fxml"), resources);
         loader.setRoot(this);
         loader.setController(this);
@@ -116,10 +119,9 @@ public class JavadocViewer extends BorderPane {
         }
 
         webView.getEngine().loadContent(resources.getString("JavadocViewer.findingJavadocs"));
-        JavadocsFinder.findJavadocs(urisToSearch).thenAccept(javadocs -> Platform.runLater(() -> {
-
+        JavadocsFinder.findJavadocs(urisToSearch.toArray(new URI[0])).thenAccept(javadocs -> Platform.runLater(() -> {
             this.uris.getItems().setAll(javadocs.stream()
-                    .map(Javadoc::getUri)
+                    .map(Javadoc::uri)
                     .sorted(Comparator.comparing(JavadocViewer::getName))
                     .toList()
             );
@@ -130,18 +132,18 @@ public class JavadocViewer extends BorderPane {
                 this.uris.getSelectionModel().select(this.uris.getItems().stream()
                         .filter(u -> getName(u).toLowerCase().contains("qupath"))
                         .findFirst()
-                        .orElse(this.uris.getItems().get(0))
+                        .orElse(this.uris.getItems().getFirst())
                 );
             }
 
             autoCompletionTextField.getSuggestions().addAll(javadocs.stream()
-                    .map(Javadoc::getElements)
+                    .map(Javadoc::elements)
                     .flatMap(List::stream)
                     .map(javadocElement -> new JavadocEntry(
                             javadocElement,
                             () -> webView.getEngine().load(javadocElement.uri().toString())
                     ))
-                    .sorted(Comparator.comparing(JavadocEntry::getName))
+                    .filter(javadocEntry -> !CATEGORIES_TO_SKIP.contains(javadocEntry.getCategory()))
                     .toList());
         }));
     }
