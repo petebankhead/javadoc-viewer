@@ -116,12 +116,15 @@ public record Javadoc(URI uri, List<JavadocElement> elements) {
                         name = nameMatcher.group(1) + "." + name;
                     }
                     String link = javadocURI + uriMatcher.group(1);
+                    String category = categoryMatcher.group(1);
+
+                    name = correctNameIfConstructor(name, category);
 
                     try {
                         elements.add(new JavadocElement(
                                 new URI(link),
                                 name,
-                                categoryMatcher.group(1)
+                                category
                         ));
                     } catch (URISyntaxException e) {
                         logger.debug("Cannot create URI {} of Javadoc element", link, e);
@@ -189,6 +192,17 @@ public record Javadoc(URI uri, List<JavadocElement> elements) {
             return lines.collect(Collectors.joining("\n"));
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private static String correctNameIfConstructor(String name, String category) {
+        // Constructor are usually written in the following way: "Class.Class(Parameter)"
+        // This function transforms them into "Class(Parameter)"
+        if (category.equals("Constructor")) {
+            int pointIndex = name.indexOf(".");
+            return name.substring(pointIndex + 1);
+        } else {
+            return name;
         }
     }
 }
