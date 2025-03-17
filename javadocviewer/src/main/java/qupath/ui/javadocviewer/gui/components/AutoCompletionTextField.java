@@ -28,7 +28,7 @@ import java.util.stream.Stream;
  */
 public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> extends TextField {
 
-    private static final int MAX_ENTRIES = 50;
+    private static final int MAX_ENTRIES = 100;
     private static final int MAX_POPUP_HEIGHT = 300;
     private final ContextMenu entriesPopup = new ContextMenu();
     private final List<T> suggestions = new ArrayList<>();
