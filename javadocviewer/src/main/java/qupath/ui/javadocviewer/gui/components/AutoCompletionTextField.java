@@ -12,6 +12,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -71,10 +72,15 @@ public class AutoCompletionTextField<T extends AutoCompleteTextFieldEntry> exten
             } else {
                 String loweredCaseEnteredText = enteredText.toLowerCase();
 
+                Comparator<AutoCompleteTextFieldEntry> comparator =
+                        Comparator.comparing((AutoCompleteTextFieldEntry e) -> e.getSearchableText().toLowerCase().equals(loweredCaseEnteredText) ? -1 : 1)
+                                .thenComparing(e -> e.getSearchableText().toLowerCase().startsWith(loweredCaseEnteredText) ? -1 : 1)
+                                .thenComparing(AutoCompleteTextFieldEntry::compareTo);
+
                 populatePopup(
                         suggestions.stream()
                                 .filter(entry -> entry.getSearchableText().toLowerCase().contains(loweredCaseEnteredText))
-                                .sorted()
+                                .sorted(comparator)
                                 .limit(MAX_ENTRIES)
                                 .toList(),
                         enteredText
