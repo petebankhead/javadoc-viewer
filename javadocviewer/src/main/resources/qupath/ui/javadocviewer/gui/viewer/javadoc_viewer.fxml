@@ -33,7 +33,7 @@
                     </tooltip>
                 </ComboBox>
             </HBox>
-            <HBox fx:id="searchContainer" alignment="CENTER_RIGHT" spacing="10.0">
+            <HBox alignment="CENTER_RIGHT" spacing="10.0">
                 <Label text="%JavadocViewer.search" />
                 <VBox.margin>
                     <Insets />

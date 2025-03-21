@@ -45,8 +45,6 @@ public class JavadocViewer extends BorderPane {
     @FXML
     private ComboBox<URI> uris;
     @FXML
-    private HBox searchContainer;
-    @FXML
     private AutoCompletionTextField<JavadocEntry> autoCompletionTextField;
 
     /**
@@ -95,7 +93,7 @@ public class JavadocViewer extends BorderPane {
                 super.updateItem(item, empty);
 
                 if (item == null || empty) {
-                    setGraphic(null);
+                    setText(null);
                 } else {
                     setText(getName(item));
                 }
@@ -107,7 +105,7 @@ public class JavadocViewer extends BorderPane {
                 super.updateItem(item, empty);
 
                 if (item == null || empty) {
-                    setGraphic(null);
+                    setText(null);
                 } else {
                     setText(getName(item));
                 }
@@ -141,7 +139,10 @@ public class JavadocViewer extends BorderPane {
                     .flatMap(List::stream)
                     .map(javadocElement -> new JavadocEntry(
                             javadocElement,
-                            () -> webView.getEngine().load(javadocElement.uri().toString())
+                            () -> {
+                                updateSelectedUri(javadocElement.uri());
+                                webView.getEngine().load(javadocElement.uri().toString());
+                            }
                     ))
                     .filter(javadocEntry -> !CATEGORIES_TO_SKIP.contains(javadocEntry.getCategory()))
                     .toList());
@@ -155,13 +156,10 @@ public class JavadocViewer extends BorderPane {
         ));
 
         uris.getSelectionModel().selectedItemProperty().addListener((p, o, n) -> {
-            if (n != null) {
+            if (n != null && !webView.getEngine().getLocation().equals(n.toString())) {
                 webView.getEngine().load(n.toString());
             }
         });
-        if (uris.getSelectionModel().getSelectedItem() != null) {
-            webView.getEngine().load(uris.getSelectionModel().getSelectedItem().toString());
-        }
 
         // Sometimes, redirection is not automatically performed
         // (see https://github.com/qupath/qupath/pull/1513#issuecomment-2095553840)
@@ -204,6 +202,24 @@ public class JavadocViewer extends BorderPane {
         return name;
     }
 
+    private void updateSelectedUri(URI uri) {
+        int maxIndex = Integer.MIN_VALUE;
+        URI closestUri = null;
+
+        for (URI sd: uris.getItems()) {
+            int index = getNumberOfCommonCharactersFromBeginning(uri.toString(), sd.toString());
+
+            if (index > maxIndex) {
+                maxIndex = index;
+                closestUri = sd;
+            }
+        }
+
+        if (closestUri != null) {
+            uris.getSelectionModel().select(closestUri);
+        }
+    }
+
     private static Optional<String> changeLocation(String currentLocation, String newLocation) {
         int index = currentLocation.lastIndexOf("/");
 
@@ -212,5 +228,17 @@ public class JavadocViewer extends BorderPane {
         } else {
             return Optional.of(currentLocation.substring(0, currentLocation.lastIndexOf("/")) + "/" + newLocation);
         }
+    }
+
+    private static int getNumberOfCommonCharactersFromBeginning(String text1, String text2) {
+        int n = Math.min(text1.length(), text2.length());
+
+        for (int i=0; i<n; i++) {
+            if (text1.charAt(i) != text2.charAt(i)) {
+                return i;
+            }
+        }
+
+        return n;
     }
 }
