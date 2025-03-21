@@ -10,7 +10,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
 import qupath.ui.javadocviewer.gui.components.AutoCompletionTextField;
