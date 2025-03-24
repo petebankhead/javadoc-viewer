@@ -3,52 +3,34 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-
+<?import javafx.scene.control.ToolBar?>
 <?import qupath.ui.javadocviewer.gui.components.AutoCompletionTextField?>
-<fx:root stylesheets="@styles.css" type="BorderPane" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
-    <top>
-        <VBox spacing="5.0" BorderPane.alignment="CENTER">
-            <HBox spacing="4.0">
-                <padding>
-                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
-                </padding>
-                <Button fx:id="back" mnemonicParsing="false" onAction="#onBackClicked" text="&lt;">
-                    <tooltip>
-                        <Tooltip text="%JavadocViewer.back" />
-                    </tooltip>
-                </Button>
-                <Button fx:id="forward" mnemonicParsing="false" onAction="#onForwardClicked" text="&gt;">
-                    <tooltip>
-                        <Tooltip text="%JavadocViewer.forward" />
-                    </tooltip>
-                </Button>
-                <ComboBox fx:id="uris" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
-                    <tooltip>
-                        <Tooltip text="%JavadocViewer.javadocSource" />
-                    </tooltip>
-                </ComboBox>
-            </HBox>
-            <HBox fx:id="searchContainer" alignment="CENTER_RIGHT" spacing="10.0">
-                <Label text="%JavadocViewer.search" />
-                <VBox.margin>
-                    <Insets />
-                </VBox.margin>
-                <padding>
-                    <Insets left="10.0" right="10.0" />
-                </padding>
-                <AutoCompletionTextField fx:id="autoCompletionTextField" prefWidth="400"/>
-            </HBox>
-            <BorderPane.margin>
-                <Insets />
-            </BorderPane.margin>
-            <padding>
-                <Insets bottom="5.0" />
-            </padding>
-        </VBox>
-    </top>
+
+<fx:root stylesheets="@styles.css" type="BorderPane" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+         <ToolBar BorderPane.alignment="CENTER">
+             <padding>
+                 <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+             </padding>
+             <Button fx:id="back" mnemonicParsing="false" onAction="#onBackClicked" text="&lt;">
+                 <tooltip>
+                     <Tooltip text="%JavadocViewer.back" />
+                 </tooltip>
+             </Button>
+             <Button fx:id="forward" mnemonicParsing="false" onAction="#onForwardClicked" text="&gt;">
+                 <tooltip>
+                     <Tooltip text="%JavadocViewer.forward" />
+                 </tooltip>
+             </Button>
+             <AutoCompletionTextField fx:id="autoCompletionTextField" promptText="%JavadocViewer.search" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS"/>
+             <ComboBox fx:id="uris" maxWidth="200">
+                 <tooltip>
+                     <Tooltip text="%JavadocViewer.javadocSource" />
+                 </tooltip>
+             </ComboBox>
+         </ToolBar>
+   </top>
 </fx:root>
