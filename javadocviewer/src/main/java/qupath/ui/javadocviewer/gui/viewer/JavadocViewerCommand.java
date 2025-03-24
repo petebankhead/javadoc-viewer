@@ -68,9 +68,6 @@ public class JavadocViewerCommand implements Runnable {
             Scene scene = new Scene(javadocViewer);
             stage.setScene(scene);
             stage.show();
-
-            stage.setMinWidth(javadocViewer.getWidth());
-            stage.setMinHeight(javadocViewer.getHeight());
         }
 
         stage.show();
